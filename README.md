@@ -1,7 +1,7 @@
 # Weight
 
 ## Curent status
-- **Current weight** : 79.5kg
-- **Current body fat percentage** : 21.6%
+- **Current weight** : 79.3kg
+- **Current body fat percentage** : 22.4%
 
 
