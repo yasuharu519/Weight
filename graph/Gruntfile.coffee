@@ -41,11 +41,22 @@ module.exports = (grunt) ->
         files:
           'build/index.css': ['index.styl']
 
+    clean:
+      debuild: ['build/', '.grunt/']
+
+    'gh-pages':
+      options:
+        base: 'build/'
+      src: ['**']
+
   grunt.loadNpmTasks 'grunt-contrib-jade'
   grunt.loadNpmTasks 'grunt-contrib-connect'
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-open'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-stylus'
+  grunt.loadNpmTasks 'grunt-contrib-clean'
+  grunt.loadNpmTasks 'grunt-gh-pages'
 
   grunt.registerTask 'default', ['jade', 'coffee', 'stylus', 'connect', 'open', 'watch']
+  grunt.registerTask 'deploy',  ['clean', 'jade', 'coffee', 'stylus', 'gh-pages']
