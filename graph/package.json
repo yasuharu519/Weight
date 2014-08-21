@@ -1,0 +1,26 @@
+{
+  "name": "Weight",
+  "version": "0.0.0",
+  "description": "yasuharu weight graph",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yasuharu519/Weight.git"
+  },
+  "author": "jigsaw (http://jgs.me)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yasuharu519/Weight/issues"
+  },
+  "homepage": "https://github.com/yasuharu519/Weight",
+  "devDependencies": {
+    "grunt-contrib-coffee": "^0.11.1",
+    "grunt": "^0.4.5",
+    "grunt-contrib-jade": "^0.12.0",
+    "grunt-contrib-connect": "^0.8.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-open": "^0.2.3",
+    "grunt-contrib-stylus": "^0.18.0",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-gh-pages": "^0.9.1"
+  }
+}
