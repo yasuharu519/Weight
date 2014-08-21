@@ -33,6 +33,8 @@ Rendering [yasuharu519/Weight](https://github.com/yasuharu519/Weight) graph on b
 
 ### deploy
 
+It is very instant. Just type `% grunt deploy` then automaticaly deploied Github:pages.
+
 ```
 % grunt deploy # push github pages(gh-pages) branch
 ```
