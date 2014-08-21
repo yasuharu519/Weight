@@ -1,0 +1,19 @@
+{
+  "name": "Weight",
+  "version": "0.0.0",
+  "description": "yasuharu weight graph",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yasuharu519/Weight.git"
+  },
+  "author": "jigsaw (http://jgs.me)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yasuharu519/Weight/issues"
+  },
+  "homepage": "https://github.com/yasuharu519/Weight"
+}
