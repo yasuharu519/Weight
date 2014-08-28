@@ -1,7 +1,9 @@
 # Weight
 
 ## Curent status
-- **Current weight** : 78.4kg
-- **Current body fat percentage** : 21.5%
+- **Current weight** : 78.9kg
+- **Current body fat percentage** : 21.4%
+
+[グラフ](http://yasuharu519.github.io/Weight/)
 
 
