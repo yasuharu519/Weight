@@ -34,7 +34,7 @@
     });
   };
 
-  $.getJSON('https://rawgit.com/yasuharu519/Weight/master/data.json').done(function(yasuharu) {
+  $.getJSON('https://raw.githubusercontent.com/yasuharu519/Weight/master/data.json').done(function(yasuharu) {
     plot(yasuharu, '#weight', 'Weight', 'Weight (kg)', 'weight', '#7cb5ec');
     plot(yasuharu, '#fat', 'Fat', '(%)', 'fat', '#827eef');
     return plot(yasuharu, '#bmi', 'BMI', '(score)', 'bmi', '#d180f2');
