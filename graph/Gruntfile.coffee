@@ -1,9 +1,9 @@
 module.exports = (grunt) ->
   grunt.initConfig
-    jade:
+    pug:
       compile:
         files:
-          'build/index.html': ['index.jade']
+          'build/index.html': ['index.pug']
 
     connect:
       server:
@@ -14,8 +14,8 @@ module.exports = (grunt) ->
 
     watch:
       pages:
-        files: ['index.jade']
-        tasks: ['jade']
+        files: ['index.pug']
+        tasks: ['pug']
       scripts:
         files: ['index.coffee']
         tasks: ['coffee']
@@ -49,7 +49,7 @@ module.exports = (grunt) ->
         base: 'build/'
       src: ['**']
 
-  grunt.loadNpmTasks 'grunt-contrib-jade'
+  grunt.loadNpmTasks 'grunt-contrib-pug'
   grunt.loadNpmTasks 'grunt-contrib-connect'
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-open'
@@ -58,5 +58,5 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-gh-pages'
 
-  grunt.registerTask 'default', ['jade', 'coffee', 'stylus', 'connect', 'open', 'watch']
-  grunt.registerTask 'deploy',  ['clean', 'jade', 'coffee', 'stylus', 'gh-pages']
+  grunt.registerTask 'default', ['pug', 'coffee', 'stylus', 'connect', 'open', 'watch']
+  grunt.registerTask 'deploy',  ['clean', 'pug', 'coffee', 'stylus', 'gh-pages']
