@@ -20,10 +20,10 @@ jobs:
       with:
         node-version: '14'
     - run: npm install
-    - name: set git setting
+    - name: grunt deploy
       run: |
         git config user.name "GitHub Action"
         git config user.email "bot@github.com"
-    - run: npx grunt deploy
+        npx grunt deploy
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
