@@ -1,9 +1,10 @@
 name: deploy to github pages
 
-on:
-  push:
-    branches:
-      - master
+# on:
+#   push:
+#     branches:
+#       - master
+on: [push]
 
 defaults:
   run:
@@ -19,6 +20,10 @@ jobs:
       with:
         node-version: '14'
     - run: npm install
+    - name: set git setting
+      run: |
+        git config user.name "GitHub Action"
+        git config user.email "bot@github.com"
     - run: npx grunt deploy
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
