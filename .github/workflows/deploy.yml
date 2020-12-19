@@ -1,10 +1,9 @@
 name: deploy to github pages
 
-# on:
-#   push:
-#     branches:
-#       - master
-on: [push]
+on:
+  push:
+    branches:
+      - master
 
 defaults:
   run:
@@ -20,10 +19,9 @@ jobs:
       with:
         node-version: '14'
     - run: npm install
-    - name: grunt deploy
-      run: |
-        git config user.name "GitHub Action"
-        git config user.email "bot@github.com"
-        npx grunt deploy
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - run: npx grunt build
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build
