@@ -24,4 +24,4 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
-    - run: npx grunt ci
+    - run: npx grunt build

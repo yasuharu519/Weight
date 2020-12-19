@@ -60,4 +60,4 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'default', ['pug', 'coffee', 'stylus', 'connect', 'open', 'watch']
   grunt.registerTask 'deploy',  ['clean', 'pug', 'coffee', 'stylus', 'gh-pages']
-  grunt.registerTask 'ci',  ['clean', 'pug', 'coffee', 'stylus']
+  grunt.registerTask 'build',  ['clean', 'pug', 'coffee', 'stylus']
