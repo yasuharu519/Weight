@@ -1,6 +1,6 @@
 "use strict";
 
-var plot = function plot(yasuharu, elm, title, ysample, key, line) {
+var plot = function plot(data, elm, title, ysample, key, line) {
   return $(elm).highcharts({
     colors: [line],
     chart: {
@@ -22,17 +22,27 @@ var plot = function plot(yasuharu, elm, title, ysample, key, line) {
     },
     series: [{
       name: title,
-      data: _.map(yasuharu.data, function (row) {
-        var date = row.datetime.split(' ')[0].split('/');
-        return [Date.UTC(date[0], date[1] - 1, date[2]), row[key]];
+      data: _.map(data, function (row) {
+        var date = new Date(row.datetime);
+        return [date, row[key]];
       })
     }]
   });
 };
 
-$.getJSON('https://raw.githubusercontent.com/yasuharu519/Weight/master/data.json').done(function (yasuharu) {
-  plot(yasuharu, '#weight', 'Weight', 'Weight (kg)', 'weight', '#7cb5ec');
-  plot(yasuharu, '#fat', 'Fat', '(%)', 'fat', '#827eef');
-  plot(yasuharu, '#bmi', 'BMI', '(score)', 'bmi', '#d180f2');
+$.get('https://raw.githubusercontent.com/yasuharu519/Weight/master/data.jsonl').done(function (data) {
+  var parsed = data.trim().split('\n').map(function (d) {
+    var parsed = JSON.parse(d);
+
+    if (parsed.fat) {
+      parsed.fat = parsed.fat / parsed.weight * 100;
+    }
+
+    parsed.bmi = parsed.weight / 1.78 / 1.78;
+    return parsed;
+  });
+  plot(parsed, '#weight', 'Weight', 'Weight (kg)', 'weight', '#7cb5ec');
+  plot(parsed, '#fat', 'Fat', '(%)', 'fat', '#827eef');
+  plot(parsed, '#bmi', 'BMI', '(score)', 'bmi', '#d180f2');
 });
 //# sourceMappingURL=index.js.map
