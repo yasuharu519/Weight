@@ -29,8 +29,8 @@ module.exports = function(grunt) {
         tasks: ['pug']
       },
       scripts: {
-        files: ['index.coffee'],
-        tasks: ['coffee']
+        files: ['index.js'],
+        tasks: ['babel']
       },
       styles: {
         files: ['index.styl'],
@@ -50,10 +50,13 @@ module.exports = function(grunt) {
       }
     },
 
-    coffee: {
-      main: {
+    babel: {
+      options: {
+        sourceMap: true
+      },
+      dist: {
         files: {
-          'build/index.js': ['index.coffee']
+          "./build/index.js": "./index.js"
         }
       }
     },
@@ -77,16 +80,16 @@ module.exports = function(grunt) {
       src: ['**']
     }});
 
+  grunt.loadNpmTasks('grunt-babel');
   grunt.loadNpmTasks('grunt-contrib-pug');
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-open');
-  grunt.loadNpmTasks('grunt-contrib-coffee');
   grunt.loadNpmTasks('grunt-contrib-stylus');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-gh-pages');
 
-  grunt.registerTask('default', ['pug', 'coffee', 'stylus', 'connect', 'open', 'watch']);
-  grunt.registerTask('deploy',  ['clean', 'pug', 'coffee', 'stylus', 'gh-pages']);
-  return grunt.registerTask('build',  ['clean', 'pug', 'coffee', 'stylus']);
+  grunt.registerTask('default', ['pug', 'babel', 'stylus', 'connect', 'open', 'watch']);
+  grunt.registerTask('deploy',  ['clean', 'pug', 'babel', 'stylus', 'gh-pages']);
+  return grunt.registerTask('build',  ['clean', 'pug', 'babel', 'stylus']);
 };

@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const plot = (yasuharu, elm, title, ysample, key, line) => $(elm).highcharts({
   colors: [line],
   chart: {
@@ -30,12 +25,14 @@ const plot = (yasuharu, elm, title, ysample, key, line) => $(elm).highcharts({
         Date.UTC(date[0], (date[1]-1), date[2]),
         row[key]
       ];
-  })
-  }
-  ]});
+    })
+  }]
+});
 
 $.getJSON('https://raw.githubusercontent.com/yasuharu519/Weight/master/data.json').done(function(yasuharu){
   plot(yasuharu, '#weight', 'Weight', 'Weight (kg)', 'weight', '#7cb5ec');
   plot(yasuharu, '#fat',    'Fat',    '(%)',         'fat',    '#827eef');
-  return plot(yasuharu, '#bmi',    'BMI',    '(score)',     'bmi',    '#d180f2');
+  plot(yasuharu, '#bmi',    'BMI',    '(score)',     'bmi',    '#d180f2');
 });
+
+
