@@ -13,9 +13,8 @@ jobs:
     steps:
     - run: |
         datetime=`date '+%F +%T'`
-      echo "{\"datetime\": \"${datetime}\", \"weight\": ${{ github.event.inputs.weight }}, \"fat\": ${{ github.event.inputs.fat }} }"
-
-
-        TZ=Asia/Tokyo
+        echo "{\"datetime\": \"${datetime}\", \"weight\": ${{ github.event.inputs.weight }}, \"fat\": ${{ github.event.inputs.fat }} }"
+      env:
+        TZ: Asia/Tokyo
 
 
