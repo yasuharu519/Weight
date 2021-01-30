@@ -26,7 +26,6 @@ jobs:
         git commit -m "Update metrics on ${datetime}"
       env:
         TZ: Asia/Tokyo
-        - name: Commit files
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
