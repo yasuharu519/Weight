@@ -18,7 +18,7 @@ jobs:
         datetime=`date '+%F %T'`
         fat=${{ github.event.inputs.fat }}
         if [ -z $fat ]; then fat=null ; fi
-        echo "{\"datetime\": \"${datetime}\", \"weight\": ${{ github.event.inputs.weight }}, \"fat\": ${fat} }"
+        echo "{\"datetime\": \"${datetime}\", \"weight\": ${{ github.event.inputs.weight }}, \"fat\": ${fat} }" >> data.jsonl
       env:
         TZ: Asia/Tokyo
 
