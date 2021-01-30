@@ -13,6 +13,10 @@ jobs:
   update_metrics:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        fetch-depth: 0
     - name: Update jsonl
       run: |
         datetime=`date '+%F %T'`
