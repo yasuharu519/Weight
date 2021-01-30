@@ -15,7 +15,9 @@ jobs:
     steps:
     - run: |
         datetime=`date '+%F %T'`
-        echo "{\"datetime\": \"${datetime}\", \"weight\": ${{ github.event.inputs.weight }}, \"fat\": ${{ github.event.inputs.fat }} }"
+        fat=${{ github.event.inputs.fat }}
+        if [ -z $fat ]; then fat=null ; fi
+        echo "{\"datetime\": \"${datetime}\", \"weight\": ${{ github.event.inputs.weight }}, \"fat\": ${fat} }"
       env:
         TZ: Asia/Tokyo
 
