@@ -19,7 +19,17 @@ jobs:
         fat=${{ github.event.inputs.fat }}
         if [ -z $fat ]; then fat=null ; fi
         echo "{\"datetime\": \"${datetime}\", \"weight\": ${{ github.event.inputs.weight }}, \"fat\": ${fat} }" >> data.jsonl
+        # git commit
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Update metrics on ${datetime}"
       env:
         TZ: Asia/Tokyo
+        - name: Commit files
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
 
