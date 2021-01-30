@@ -13,7 +13,8 @@ jobs:
   update_metrics:
     runs-on: ubuntu-latest
     steps:
-    - run: |
+    - name: Update jsonl
+      run: |
         datetime=`date '+%F %T'`
         fat=${{ github.event.inputs.fat }}
         if [ -z $fat ]; then fat=null ; fi
