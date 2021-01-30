@@ -22,7 +22,7 @@ jobs:
         datetime=`date '+%F %T'`
         fat=${{ github.event.inputs.fat }}
         if [ -z $fat ]; then fat=null ; fi
-        echo "{\"datetime\": \"${datetime}\", \"weight\": ${{ github.event.inputs.weight }}, \"fat\": ${fat} }" >> data.jsonl
+        echo "{\"datetime\": \"${datetime}\", \"weight\": ${{ github.event.inputs.weight }}, \"fat\": ${fat}}" >> data.jsonl
         # git commit
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
