@@ -35,14 +35,17 @@ $.get('https://raw.githubusercontent.com/yasuharu519/Weight/master/data.jsonl').
     var parsed = JSON.parse(d);
 
     if (parsed.fat) {
-      parsed.fat = parsed.fat / parsed.weight * 100;
+      parsed.fat_percent = parsed.fat / parsed.weight * 100;
+    } else {
+      parsed.fat_percent = null;
     }
 
     parsed.bmi = parsed.weight / 1.78 / 1.78;
     return parsed;
   });
   plot(parsed, '#weight', 'Weight', 'Weight (kg)', 'weight', '#7cb5ec');
-  plot(parsed, '#fat', 'Fat', '(%)', 'fat', '#827eef');
+  plot(parsed, '#fat_kiro', 'Fat (kg)', 'Fat (kg)', 'fat', '#827eef');
+  plot(parsed, '#fat', 'Fat (%)', 'Fat (%)', 'fat_percent', '#826eef');
   plot(parsed, '#bmi', 'BMI', '(score)', 'bmi', '#d180f2');
 });
 //# sourceMappingURL=index.js.map
