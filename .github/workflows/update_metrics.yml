@@ -34,5 +34,29 @@ jobs:
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-
+    - name: Slack Notification on SUCCESS
+      if: success()
+      uses: tokorom/action-slack-incoming-webhook@main
+      env:
+        INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      with:
+        text: Weight updated!
+        attachments: |
+          [
+            {
+              "color": "good",
+              "author_name": "${{ github.actor }}",
+              "author_icon": "${{ github.event.sender.avatar_url }}",
+              "fields": [
+                {
+                  "title": "Weight",
+                  "value": "${{ github.event.inputs.weight }}"
+                },
+                {
+                  "title": "Fat (kg)",
+                  "value": "${{ github.event.inputs.fat }}"
+                }
+              ]
+            }
+          ]
 
