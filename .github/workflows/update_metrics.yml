@@ -21,6 +21,7 @@ jobs:
       run: |
         datetime=`date '+%F %T'`
         fat=${{ github.event.inputs.fat }}
+        fat_percent=$((${{ github.event.inputs.fat }} / ${{ github.event.inputs.weight }} * 100 ))
         if [ -z $fat ]; then fat=null ; fi
         echo "{\"datetime\": \"${datetime}\", \"weight\": ${{ github.event.inputs.weight }}, \"fat\": ${fat}}" >> data.jsonl
         # git commit
@@ -49,12 +50,16 @@ jobs:
               "author_icon": "${{ github.event.sender.avatar_url }}",
               "fields": [
                 {
-                  "title": "Weight",
+                  "title": "体重",
                   "value": "${{ github.event.inputs.weight }}"
                 },
                 {
-                  "title": "Fat (kg)",
+                  "title": "脂肪 (kg)",
                   "value": "${{ github.event.inputs.fat }}"
+                },
+                {
+                  "title": "体脂肪率 (%)",
+                  "value": "${{ fat_percent }}"
                 }
               ]
             }
