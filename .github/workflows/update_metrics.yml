@@ -63,4 +63,5 @@ jobs:
       run: |
         date=`date '+%Y%m%d'`
         curl -X POST https://pixe.la/v1/users/yasuharu519/graphs/weight -H "X-USER-TOKEN:${{ secrets.PIXELA_TOKEN }}" -d "{\"date\":\"${date}\",\"quantity\":\"${{ github.event.inputs.weight }}\"}"
-
+      env:
+        TZ: Asia/Tokyo
