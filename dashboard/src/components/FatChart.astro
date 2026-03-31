@@ -11,10 +11,10 @@ const dataJson = JSON.stringify(data);
 const maJson = JSON.stringify(movingAvg);
 ---
 
-<div class="bg-card rounded-2xl border border-border p-6 shadow-sm mb-8 animate-fade-up" style="animation-delay: 0.24s;">
-  <div class="flex items-center justify-between mb-5">
-    <h2 class="font-display text-lg font-500 tracking-tight text-ink">体脂肪率</h2>
-    <div class="flex gap-1.5" id="fat-period-buttons">
+<div class="bg-card rounded-2xl border border-border p-4 md:p-6 shadow-sm mb-6 md:mb-8 animate-fade-up" style="animation-delay: 0.24s;">
+  <div class="flex items-center justify-between mb-4 md:mb-5">
+    <h2 class="font-display text-base md:text-lg font-500 tracking-tight text-ink">体脂肪率</h2>
+    <div class="flex gap-1 md:gap-1.5" id="fat-period-buttons">
       <button data-period="1" class="fat-period-btn">1M</button>
       <button data-period="3" class="fat-period-btn">3M</button>
       <button data-period="6" class="fat-period-btn">6M</button>
@@ -22,7 +22,7 @@ const maJson = JSON.stringify(movingAvg);
       <button data-period="all" class="fat-period-btn fat-period-active">ALL</button>
     </div>
   </div>
-  <div class="h-[380px]">
+  <div class="h-[280px] md:h-[380px]">
     <canvas id="fat-chart"></canvas>
   </div>
 </div>
@@ -130,7 +130,8 @@ const maJson = JSON.stringify(movingAvg);
       chart.data.datasets[0].data = allFat;
       chart.data.datasets[1].data = allMA;
     } else {
-      const cutoff = new Date();
+      const lastDate = new Date(allDates[allDates.length - 1]);
+      const cutoff = new Date(lastDate);
       cutoff.setMonth(cutoff.getMonth() - months);
       const cutoffStr = cutoff.toISOString().split("T")[0];
       const startIdx = allDates.findIndex((d: string) => d >= cutoffStr);

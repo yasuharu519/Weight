@@ -9,16 +9,16 @@ const { data } = Astro.props;
 const dataJson = JSON.stringify(data);
 ---
 
-<div class="bg-card rounded-2xl border border-border p-6 shadow-sm mb-8 animate-fade-up" style="animation-delay: 0.32s;">
-  <div class="flex items-center justify-between mb-5">
-    <h2 class="font-display text-lg font-500 tracking-tight text-ink">月次トレンド</h2>
-    <div class="flex gap-1.5" id="monthly-period-buttons">
+<div class="bg-card rounded-2xl border border-border p-4 md:p-6 shadow-sm mb-6 md:mb-8 animate-fade-up" style="animation-delay: 0.32s;">
+  <div class="flex items-center justify-between mb-4 md:mb-5">
+    <h2 class="font-display text-base md:text-lg font-500 tracking-tight text-ink">月次トレンド</h2>
+    <div class="flex gap-1 md:gap-1.5" id="monthly-period-buttons">
       <button data-period="2" class="monthly-btn monthly-active">2Y</button>
       <button data-period="5" class="monthly-btn">5Y</button>
       <button data-period="all" class="monthly-btn">ALL</button>
     </div>
   </div>
-  <div class="h-[320px]">
+  <div class="h-[260px] md:h-[320px]">
     <canvas id="monthly-chart"></canvas>
   </div>
 </div>
@@ -70,8 +70,11 @@ const dataJson = JSON.stringify(data);
     if (periodYears === "all") {
       return { months: allMonths, weights: allWeights, colors: allColors };
     }
-    const cutoffYear = new Date().getFullYear() - periodYears;
-    const cutoffMonth = `${cutoffYear}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
+    const lastMonth = allMonths[allMonths.length - 1];
+    const lastDate = new Date(lastMonth + "-01");
+    const cutoff = new Date(lastDate);
+    cutoff.setFullYear(cutoff.getFullYear() - periodYears);
+    const cutoffMonth = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, "0")}`;
     const startIdx = allMonths.findIndex((m: string) => m >= cutoffMonth);
     if (startIdx < 0) return { months: allMonths, weights: allWeights, colors: allColors };
     return {
