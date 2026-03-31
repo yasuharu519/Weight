@@ -1,0 +1,156 @@
+---
+import type { WeightRecord, MovingAverageRecord } from "../lib/data";
+
+interface Props {
+  data: WeightRecord[];
+  movingAvg: MovingAverageRecord[];
+}
+
+const { data, movingAvg } = Astro.props;
+const dataJson = JSON.stringify(data);
+const maJson = JSON.stringify(movingAvg);
+---
+
+<div class="bg-card rounded-2xl border border-border p-6 shadow-sm mb-8 animate-fade-up" style="animation-delay: 0.24s;">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="font-display text-lg font-500 tracking-tight text-ink">体脂肪率</h2>
+    <div class="flex gap-1.5" id="fat-period-buttons">
+      <button data-period="1" class="fat-period-btn">1M</button>
+      <button data-period="3" class="fat-period-btn">3M</button>
+      <button data-period="6" class="fat-period-btn">6M</button>
+      <button data-period="12" class="fat-period-btn">1Y</button>
+      <button data-period="all" class="fat-period-btn fat-period-active">ALL</button>
+    </div>
+  </div>
+  <div class="h-[380px]">
+    <canvas id="fat-chart"></canvas>
+  </div>
+</div>
+
+<style>
+  .fat-period-btn {
+    @apply text-[0.7rem] font-medium tracking-wide px-3 py-1 rounded-full
+           border border-transparent text-ink-muted
+           hover:text-ink-secondary hover:bg-gray-50
+           transition-all duration-200 cursor-pointer;
+  }
+  .fat-period-active {
+    @apply bg-warm-soft text-warm border-orange-200;
+  }
+</style>
+
+<script is:inline define:vars={{ dataJson, maJson }}>
+  window.__fatData = JSON.parse(dataJson);
+  window.__fatMAData = JSON.parse(maJson);
+</script>
+
+<script>
+  import Chart from "chart.js/auto";
+
+  const data = (window as any).__fatData;
+  const maData = (window as any).__fatMAData;
+
+  const allDates = data.map((d: any) => d.date);
+  const allFat = data.map((d: any) => d.fatPercent);
+  const allMA = maData.map((d: any) => d.fatPercent);
+
+  const chart = new Chart(document.getElementById("fat-chart") as HTMLCanvasElement, {
+    type: "line",
+    data: {
+      labels: allDates,
+      datasets: [
+        {
+          label: "体脂肪率",
+          data: allFat,
+          borderColor: "rgba(194, 65, 12, 0.2)",
+          backgroundColor: (ctx) => {
+            const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
+            g.addColorStop(0, "rgba(194, 65, 12, 0.06)");
+            g.addColorStop(1, "rgba(194, 65, 12, 0)");
+            return g;
+          },
+          borderWidth: 1.5,
+          pointRadius: 0,
+          pointHitRadius: 10,
+          fill: true,
+          tension: 0.35,
+          spanGaps: false,
+        },
+        {
+          label: "30d avg",
+          data: allMA,
+          borderColor: "rgba(194, 65, 12, 0.75)",
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHitRadius: 10,
+          fill: false,
+          tension: 0.35,
+          spanGaps: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#fff",
+          titleColor: "#1a1a1a",
+          bodyColor: "#6b7280",
+          borderColor: "#e8e4df",
+          borderWidth: 1,
+          titleFont: { family: "'Fraunces', Georgia, serif", weight: "500", size: 13 },
+          bodyFont: { family: "'Plus Jakarta Sans', system-ui", size: 12 },
+          padding: 14,
+          cornerRadius: 12,
+          boxPadding: 6,
+          callbacks: {
+            label: (item) => item.raw != null ? `${item.dataset.label}:  ${item.raw}%` : "",
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { maxTicksLimit: 10, padding: 10 },
+          grid: { display: false },
+        },
+        y: {
+          ticks: { padding: 14 },
+          grid: { color: "rgba(0,0,0,0.03)" },
+        },
+      },
+    },
+  });
+
+  function filterByMonths(months: number | "all") {
+    if (months === "all") {
+      chart.data.labels = allDates;
+      chart.data.datasets[0].data = allFat;
+      chart.data.datasets[1].data = allMA;
+    } else {
+      const cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - months);
+      const cutoffStr = cutoff.toISOString().split("T")[0];
+      const startIdx = allDates.findIndex((d: string) => d >= cutoffStr);
+      if (startIdx >= 0) {
+        chart.data.labels = allDates.slice(startIdx);
+        chart.data.datasets[0].data = allFat.slice(startIdx);
+        chart.data.datasets[1].data = allMA.slice(startIdx);
+      }
+    }
+    chart.update();
+  }
+
+  document.getElementById("fat-period-buttons")!.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest("button");
+    if (!btn) return;
+    const period = btn.dataset.period!;
+    document.querySelectorAll("#fat-period-buttons button").forEach((b) => {
+      b.className = "fat-period-btn";
+    });
+    btn.classList.add("fat-period-active");
+    filterByMonths(period === "all" ? "all" : parseInt(period));
+  });
+</script>
