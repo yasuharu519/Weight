@@ -13,7 +13,7 @@ jobs:
   update_metrics:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         persist-credentials: false
         fetch-depth: 0
@@ -31,12 +31,12 @@ jobs:
       env:
         TZ: Asia/Tokyo
     - name: Push changes
-      uses: ad-m/github-push-action@master
+      uses: ad-m/github-push-action@77c5b412c50b723d2a4fbc6d71fb5723bcd439aa # v1.0.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
     - name: Slack Notification on SUCCESS
       if: success()
-      uses: tokorom/action-slack-incoming-webhook@main
+      uses: tokorom/action-slack-incoming-webhook@d57bf1eb618f3dae9509afefa70d5774ad3d42bf # v1.3.0
       env:
         INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       with:
