@@ -1,0 +1,59 @@
+---
+interface Props {
+  latestWeight: number;
+  latestDate: string;
+  weekOverWeek: number | null;
+  movingAvg30: number;
+  bmi: number;
+}
+
+const { latestWeight, latestDate, weekOverWeek, movingAvg30, bmi } = Astro.props;
+
+const wowPositive = weekOverWeek != null && weekOverWeek > 0;
+const wowSign = weekOverWeek != null && weekOverWeek > 0 ? "+" : "";
+const wowArrow = weekOverWeek != null ? (weekOverWeek <= 0 ? "\u2198" : "\u2197") : "";
+---
+
+<div class="grid grid-cols-4 gap-5 mb-10 animate-fade-up" style="animation-delay: 0.08s;">
+  <!-- Latest Weight — hero card -->
+  <div class="bg-card rounded-2xl border border-border p-6 shadow-sm col-span-1 relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-accent to-indigo-300"></div>
+    <p class="text-[0.65rem] font-medium tracking-[0.12em] uppercase text-ink-muted mb-3">最新体重</p>
+    <p class="font-display text-4xl font-600 tracking-tight text-ink leading-none">
+      {latestWeight}
+      <span class="text-base font-body font-normal text-ink-muted ml-0.5">kg</span>
+    </p>
+    <p class="text-xs text-ink-muted mt-2.5 font-light italic">{latestDate}</p>
+  </div>
+
+  <!-- Week over Week -->
+  <div class="bg-card rounded-2xl border border-border p-6 shadow-sm">
+    <p class="text-[0.65rem] font-medium tracking-[0.12em] uppercase text-ink-muted mb-3">前週比</p>
+    {weekOverWeek != null ? (
+      <p class={`font-display text-4xl font-600 tracking-tight leading-none ${wowPositive ? "text-warm" : "text-sage"}`}>
+        {wowSign}{weekOverWeek}
+        <span class="text-base font-body font-normal ml-0.5">kg</span>
+        <span class="text-lg ml-1">{wowArrow}</span>
+      </p>
+    ) : (
+      <p class="font-display text-4xl font-600 text-ink-muted leading-none">—</p>
+    )}
+  </div>
+
+  <!-- 30d Moving Average -->
+  <div class="bg-card rounded-2xl border border-border p-6 shadow-sm">
+    <p class="text-[0.65rem] font-medium tracking-[0.12em] uppercase text-ink-muted mb-3">30日平均</p>
+    <p class="font-display text-4xl font-600 tracking-tight text-ink leading-none">
+      {movingAvg30}
+      <span class="text-base font-body font-normal text-ink-muted ml-0.5">kg</span>
+    </p>
+  </div>
+
+  <!-- BMI -->
+  <div class="bg-card rounded-2xl border border-border p-6 shadow-sm">
+    <p class="text-[0.65rem] font-medium tracking-[0.12em] uppercase text-ink-muted mb-3">BMI</p>
+    <p class="font-display text-4xl font-600 tracking-tight text-ink leading-none">
+      {bmi}
+    </p>
+  </div>
+</div>

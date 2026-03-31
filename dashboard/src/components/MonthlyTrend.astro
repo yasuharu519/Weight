@@ -1,0 +1,146 @@
+---
+import type { MonthlyRecord } from "../lib/data";
+
+interface Props {
+  data: MonthlyRecord[];
+}
+
+const { data } = Astro.props;
+const dataJson = JSON.stringify(data);
+---
+
+<div class="bg-card rounded-2xl border border-border p-6 shadow-sm mb-8 animate-fade-up" style="animation-delay: 0.32s;">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="font-display text-lg font-500 tracking-tight text-ink">月次トレンド</h2>
+    <div class="flex gap-1.5" id="monthly-period-buttons">
+      <button data-period="2" class="monthly-btn monthly-active">2Y</button>
+      <button data-period="5" class="monthly-btn">5Y</button>
+      <button data-period="all" class="monthly-btn">ALL</button>
+    </div>
+  </div>
+  <div class="h-[320px]">
+    <canvas id="monthly-chart"></canvas>
+  </div>
+</div>
+
+<style>
+  .monthly-btn {
+    @apply text-[0.7rem] font-medium tracking-wide px-3 py-1 rounded-full
+           border border-transparent text-ink-muted
+           hover:text-ink-secondary hover:bg-gray-50
+           transition-all duration-200 cursor-pointer;
+  }
+  .monthly-active {
+    @apply bg-sage-soft text-sage border-green-200;
+  }
+</style>
+
+<script is:inline define:vars={{ dataJson }}>
+  window.__monthlyData = JSON.parse(dataJson);
+</script>
+
+<script>
+  import Chart from "chart.js/auto";
+
+  const data = (window as any).__monthlyData;
+
+  const years = [...new Set(data.map((d: any) => d.year))] as number[];
+  const palette = [
+    "rgba(67, 56, 202, 0.55)",
+    "rgba(194, 65, 12, 0.50)",
+    "rgba(21, 128, 61, 0.50)",
+    "rgba(147, 51, 234, 0.50)",
+    "rgba(202, 138, 4, 0.50)",
+    "rgba(14, 116, 144, 0.50)",
+    "rgba(190, 18, 60, 0.50)",
+    "rgba(79, 70, 229, 0.45)",
+    "rgba(234, 88, 12, 0.45)",
+    "rgba(22, 163, 74, 0.45)",
+    "rgba(168, 85, 247, 0.45)",
+  ];
+
+  const yearColors = new Map<number, string>();
+  years.forEach((y, i) => yearColors.set(y, palette[i % palette.length]));
+
+  const allMonths = data.map((d: any) => d.month);
+  const allWeights = data.map((d: any) => d.weight);
+  const allColors = data.map((d: any) => yearColors.get(d.year));
+
+  function getFilteredData(periodYears: number | "all") {
+    if (periodYears === "all") {
+      return { months: allMonths, weights: allWeights, colors: allColors };
+    }
+    const cutoffYear = new Date().getFullYear() - periodYears;
+    const cutoffMonth = `${cutoffYear}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
+    const startIdx = allMonths.findIndex((m: string) => m >= cutoffMonth);
+    if (startIdx < 0) return { months: allMonths, weights: allWeights, colors: allColors };
+    return {
+      months: allMonths.slice(startIdx),
+      weights: allWeights.slice(startIdx),
+      colors: allColors.slice(startIdx),
+    };
+  }
+
+  const initial = getFilteredData(2);
+
+  const chart = new Chart(document.getElementById("monthly-chart") as HTMLCanvasElement, {
+    type: "bar",
+    data: {
+      labels: initial.months,
+      datasets: [{
+        label: "月平均体重",
+        data: initial.weights,
+        backgroundColor: initial.colors,
+        borderWidth: 0,
+        borderRadius: 4,
+        borderSkipped: false,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#fff",
+          titleColor: "#1a1a1a",
+          bodyColor: "#6b7280",
+          borderColor: "#e8e4df",
+          borderWidth: 1,
+          titleFont: { family: "'Fraunces', Georgia, serif", weight: "500", size: 13 },
+          bodyFont: { family: "'Plus Jakarta Sans', system-ui", size: 12 },
+          padding: 14,
+          cornerRadius: 12,
+          callbacks: {
+            label: (item) => `${item.raw} kg`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { maxTicksLimit: 20, padding: 8 },
+          grid: { display: false },
+        },
+        y: {
+          ticks: { padding: 14 },
+          grid: { color: "rgba(0,0,0,0.03)" },
+        },
+      },
+    },
+  });
+
+  document.getElementById("monthly-period-buttons")!.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest("button");
+    if (!btn) return;
+    const period = btn.dataset.period!;
+    document.querySelectorAll("#monthly-period-buttons button").forEach((b) => {
+      b.className = "monthly-btn";
+    });
+    btn.classList.add("monthly-active");
+    const filtered = getFilteredData(period === "all" ? "all" : parseInt(period));
+    chart.data.labels = filtered.months;
+    chart.data.datasets[0].data = filtered.weights;
+    chart.data.datasets[0].backgroundColor = filtered.colors;
+    chart.update();
+  });
+</script>

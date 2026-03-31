@@ -1,0 +1,38 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SummaryCards from "../components/SummaryCards.astro";
+import WeightChart from "../components/WeightChart.astro";
+import FatChart from "../components/FatChart.astro";
+import MonthlyTrend from "../components/MonthlyTrend.astro";
+import YearlyStats from "../components/YearlyStats.astro";
+import {
+  loadData,
+  calcMovingAverage,
+  calcMonthlyAvg,
+  calcYearlyStats,
+  calcWeekOverWeek,
+} from "../lib/data";
+
+const data = loadData();
+const movingAvg = calcMovingAverage(data, 30);
+const monthlyAvg = calcMonthlyAvg(data);
+const yearlyStats = calcYearlyStats(data);
+const weekOverWeek = calcWeekOverWeek(data);
+
+const latest = data[data.length - 1];
+const latestMA = movingAvg[movingAvg.length - 1];
+---
+
+<Layout title="Weight Dashboard">
+  <SummaryCards
+    latestWeight={latest.weight}
+    latestDate={latest.date}
+    weekOverWeek={weekOverWeek}
+    movingAvg30={latestMA.weight}
+    bmi={latest.bmi}
+  />
+  <WeightChart data={data} movingAvg={movingAvg} />
+  <FatChart data={data} movingAvg={movingAvg} />
+  <MonthlyTrend data={monthlyAvg} />
+  <YearlyStats data={yearlyStats} />
+</Layout>

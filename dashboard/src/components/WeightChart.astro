@@ -1,0 +1,159 @@
+---
+import type { WeightRecord, MovingAverageRecord } from "../lib/data";
+
+interface Props {
+  data: WeightRecord[];
+  movingAvg: MovingAverageRecord[];
+}
+
+const { data, movingAvg } = Astro.props;
+const dataJson = JSON.stringify(data);
+const maJson = JSON.stringify(movingAvg);
+---
+
+<div class="bg-card rounded-2xl border border-border p-6 shadow-sm mb-8 animate-fade-up" style="animation-delay: 0.16s;">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="font-display text-lg font-500 tracking-tight text-ink">体重</h2>
+    <div class="flex gap-1.5" id="weight-period-buttons">
+      <button data-period="1" class="period-btn">1M</button>
+      <button data-period="3" class="period-btn">3M</button>
+      <button data-period="6" class="period-btn">6M</button>
+      <button data-period="12" class="period-btn">1Y</button>
+      <button data-period="all" class="period-btn period-active">ALL</button>
+    </div>
+  </div>
+  <div class="h-[380px]">
+    <canvas id="weight-chart"></canvas>
+  </div>
+</div>
+
+<style>
+  .period-btn {
+    @apply text-[0.7rem] font-medium tracking-wide px-3 py-1 rounded-full
+           border border-transparent text-ink-muted
+           hover:text-ink-secondary hover:bg-gray-50
+           transition-all duration-200 cursor-pointer;
+  }
+  .period-active {
+    @apply bg-accent-soft text-accent border-indigo-200;
+  }
+</style>
+
+<script is:inline define:vars={{ dataJson, maJson }}>
+  window.__weightData = JSON.parse(dataJson);
+  window.__weightMAData = JSON.parse(maJson);
+</script>
+
+<script>
+  import Chart from "chart.js/auto";
+
+  const data = (window as any).__weightData;
+  const maData = (window as any).__weightMAData;
+
+  const allDates = data.map((d: any) => d.date);
+  const allWeights = data.map((d: any) => d.weight);
+  const allMA = maData.map((d: any) => d.weight);
+
+  Chart.defaults.font.family = "'Plus Jakarta Sans', system-ui, sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.color = "#9ca3af";
+  Chart.defaults.borderColor = "rgba(0,0,0,0.04)";
+
+  const chart = new Chart(document.getElementById("weight-chart") as HTMLCanvasElement, {
+    type: "line",
+    data: {
+      labels: allDates,
+      datasets: [
+        {
+          label: "体重",
+          data: allWeights,
+          borderColor: "rgba(67, 56, 202, 0.2)",
+          backgroundColor: (ctx) => {
+            const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
+            g.addColorStop(0, "rgba(67, 56, 202, 0.06)");
+            g.addColorStop(1, "rgba(67, 56, 202, 0)");
+            return g;
+          },
+          borderWidth: 1.5,
+          pointRadius: 0,
+          pointHitRadius: 10,
+          fill: true,
+          tension: 0.35,
+        },
+        {
+          label: "30d avg",
+          data: allMA,
+          borderColor: "rgba(67, 56, 202, 0.8)",
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHitRadius: 10,
+          fill: false,
+          tension: 0.35,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#fff",
+          titleColor: "#1a1a1a",
+          bodyColor: "#6b7280",
+          borderColor: "#e8e4df",
+          borderWidth: 1,
+          titleFont: { family: "'Fraunces', Georgia, serif", weight: "500", size: 13 },
+          bodyFont: { family: "'Plus Jakarta Sans', system-ui", size: 12 },
+          padding: 14,
+          cornerRadius: 12,
+          boxPadding: 6,
+          callbacks: {
+            label: (item) => `${item.dataset.label}:  ${item.raw} kg`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { maxTicksLimit: 10, padding: 10 },
+          grid: { display: false },
+        },
+        y: {
+          ticks: { padding: 14 },
+          grid: { color: "rgba(0,0,0,0.03)" },
+        },
+      },
+    },
+  });
+
+  function filterByMonths(months: number | "all") {
+    if (months === "all") {
+      chart.data.labels = allDates;
+      chart.data.datasets[0].data = allWeights;
+      chart.data.datasets[1].data = allMA;
+    } else {
+      const cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - months);
+      const cutoffStr = cutoff.toISOString().split("T")[0];
+      const startIdx = allDates.findIndex((d: string) => d >= cutoffStr);
+      if (startIdx >= 0) {
+        chart.data.labels = allDates.slice(startIdx);
+        chart.data.datasets[0].data = allWeights.slice(startIdx);
+        chart.data.datasets[1].data = allMA.slice(startIdx);
+      }
+    }
+    chart.update();
+  }
+
+  document.getElementById("weight-period-buttons")!.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest("button");
+    if (!btn) return;
+    const period = btn.dataset.period!;
+    document.querySelectorAll("#weight-period-buttons button").forEach((b) => {
+      b.className = "period-btn";
+    });
+    btn.classList.add("period-active");
+    filterByMonths(period === "all" ? "all" : parseInt(period));
+  });
+</script>

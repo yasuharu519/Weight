@@ -1,0 +1,43 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  </head>
+  <body class="min-h-screen bg-surface font-body text-ink">
+    <!-- subtle grain texture -->
+    <div class="fixed inset-0 pointer-events-none opacity-[0.015]" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%270 0 256 256%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 numOctaves=%274%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27/%3E%3C/svg%3E');"></div>
+
+    <div class="relative z-10">
+      <header class="max-w-5xl mx-auto px-8 pt-12 pb-2 animate-fade-up">
+        <div class="flex items-baseline gap-4">
+          <h1 class="font-display text-3xl font-500 tracking-tight text-ink" style="font-variation-settings: 'SOFT' 100, 'WONK' 1;">Weight</h1>
+          <span class="text-[0.65rem] font-medium tracking-[0.15em] uppercase text-ink-muted">Journal</span>
+        </div>
+        <div class="mt-2 w-12 h-[2px] bg-accent rounded-full"></div>
+      </header>
+
+      <main class="max-w-5xl mx-auto px-8 py-8">
+        <slot />
+      </main>
+
+      <footer class="max-w-5xl mx-auto px-8 pb-12">
+        <div class="border-t border-border pt-6">
+          <p class="text-xs text-ink-muted">Tracking since 2014 &middot; {new Date().getFullYear()}</p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
