@@ -1,0 +1,41 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+  ],
+
+  // サプライチェーン攻撃対策: 公開から14日間は様子を見る
+  "minimumReleaseAge": "14 days",
+
+  "packageRules": [
+    // Astro 関連をグルーピング
+    {
+      "groupName": "astro",
+      "matchPackagePatterns": ["^astro", "^@astrojs/"],
+    },
+
+    // Tailwind CSS 関連
+    {
+      "groupName": "tailwindcss",
+      "matchPackagePatterns": ["^tailwindcss", "^@tailwindcss/"],
+    },
+
+    // Chart.js 関連
+    {
+      "groupName": "chart.js",
+      "matchPackagePatterns": ["^chart\\.js"],
+    },
+
+    // GitHub Actions をグルーピング
+    {
+      "groupName": "github-actions",
+      "matchManagers": ["github-actions"],
+    },
+
+    // devDependencies はまとめて1つの PR に
+    {
+      "groupName": "dev-dependencies",
+      "matchDepTypes": ["devDependencies"],
+    },
+  ],
+}
