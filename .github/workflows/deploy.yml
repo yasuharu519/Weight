@@ -5,7 +5,7 @@ on:
     branches:
       - main
   workflow_run:
-    workflows: ["update metrics"]
+    workflows: ["update metrics", "Sync weight data from D1"]
     types:
       - completed
 
