@@ -1988,3 +1988,4 @@
 {"datetime": "2026-04-01 13:25:12", "weight": 76.929, "fat": 13.66}
 {"datetime": "2026-04-01 22:52:00", "weight": 77.439, "fat": 14.17}
 {"datetime":"2026-04-03 11:00:15","weight":78.04,"fat":14.43,"fat_ratio":18.491,"fat_free_mass":63.6,"muscle_mass":60.42,"hydration":44.45,"bone_mass":3.17,"visceral_fat":2.7,"basal_metabolic_rate":1841,"metabolic_age":34}
+{"datetime":"2026-04-04 11:07:00","weight":76.367,"fat":13.73,"fat_ratio":17.979,"fat_free_mass":62.620000000000005,"muscle_mass":59.49,"hydration":43.25,"bone_mass":3.13,"visceral_fat":2.6,"basal_metabolic_rate":1810,"metabolic_age":34}
