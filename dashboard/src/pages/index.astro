@@ -3,6 +3,8 @@ import Layout from "../layouts/Layout.astro";
 import SummaryCards from "../components/SummaryCards.astro";
 import WeightChart from "../components/WeightChart.astro";
 import FatChart from "../components/FatChart.astro";
+import BodyCompChart from "../components/BodyCompChart.astro";
+import MetabolicsCards from "../components/MetabolicsCards.astro";
 import MonthlyTrend from "../components/MonthlyTrend.astro";
 import YearlyStats from "../components/YearlyStats.astro";
 import {
@@ -33,6 +35,8 @@ const latestMA = movingAvg[movingAvg.length - 1];
   />
   <WeightChart data={data} movingAvg={movingAvg} />
   <FatChart data={data} movingAvg={movingAvg} />
+  <MetabolicsCards data={data} />
+  <BodyCompChart data={data} />
   <MonthlyTrend data={monthlyAvg} />
   <YearlyStats data={yearlyStats} />
 </Layout>
