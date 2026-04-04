@@ -1,0 +1,180 @@
+---
+import type { WeightRecord } from "../lib/data";
+
+interface Props {
+  data: WeightRecord[];
+}
+
+const { data } = Astro.props;
+
+// Body Comp データがあるレコードのみ
+const bodyCompData = data.filter((d) => d.muscleMass != null);
+const dataJson = JSON.stringify(bodyCompData);
+---
+
+{bodyCompData.length > 0 && (
+  <div class="bg-card rounded-2xl border border-border p-4 md:p-6 shadow-sm mb-6 md:mb-8 animate-fade-up" style="animation-delay: 0.28s;">
+    <div class="flex items-center justify-between mb-4 md:mb-5">
+      <h2 class="font-display text-base md:text-lg font-500 tracking-tight text-ink">ボディコンポジション</h2>
+      <div class="flex gap-1 md:gap-1.5" id="bodycomp-period-buttons">
+        <button data-period="1" class="bodycomp-btn">1M</button>
+        <button data-period="3" class="bodycomp-btn">3M</button>
+        <button data-period="6" class="bodycomp-btn">6M</button>
+        <button data-period="12" class="bodycomp-btn">1Y</button>
+        <button data-period="all" class="bodycomp-btn bodycomp-active">ALL</button>
+      </div>
+    </div>
+    <div class="h-[280px] md:h-[380px]">
+      <canvas id="bodycomp-chart"></canvas>
+    </div>
+  </div>
+)}
+
+<style>
+  .bodycomp-btn {
+    @apply text-[0.7rem] font-medium tracking-wide px-3 py-1 rounded-full
+           border border-transparent text-ink-muted
+           hover:text-ink-secondary hover:bg-gray-50
+           transition-all duration-200 cursor-pointer;
+  }
+  .bodycomp-active {
+    @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+  }
+</style>
+
+<script is:inline define:vars={{ dataJson }}>
+  window.__bodyCompData = JSON.parse(dataJson);
+</script>
+
+<script>
+  import Chart from "chart.js/auto";
+
+  const data = (window as any).__bodyCompData;
+  if (data && data.length > 0) {
+    const allDates = data.map((d: any) => d.date);
+    const allMuscle = data.map((d: any) => d.muscleMass);
+    const allHydration = data.map((d: any) => d.hydration);
+    const allBone = data.map((d: any) => d.boneMass);
+
+    const chart = new Chart(document.getElementById("bodycomp-chart") as HTMLCanvasElement, {
+      type: "line",
+      data: {
+        labels: allDates,
+        datasets: [
+          {
+            label: "筋肉量 (kg)",
+            data: allMuscle,
+            borderColor: "rgba(16, 185, 129, 0.8)",
+            backgroundColor: "rgba(16, 185, 129, 0.05)",
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHitRadius: 10,
+            fill: false,
+            tension: 0.3,
+          },
+          {
+            label: "水分量 (kg)",
+            data: allHydration,
+            borderColor: "rgba(59, 130, 246, 0.8)",
+            backgroundColor: "rgba(59, 130, 246, 0.05)",
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHitRadius: 10,
+            fill: false,
+            tension: 0.3,
+          },
+          {
+            label: "骨量 (kg)",
+            data: allBone,
+            borderColor: "rgba(245, 158, 11, 0.8)",
+            backgroundColor: "rgba(245, 158, 11, 0.05)",
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHitRadius: 10,
+            fill: false,
+            tension: 0.3,
+            yAxisID: "y1",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: {
+            display: true,
+            position: "top",
+            labels: {
+              font: { family: "'Plus Jakarta Sans', system-ui", size: 11 },
+              color: "#6b7280",
+              usePointStyle: true,
+              pointStyle: "circle",
+              padding: 16,
+            },
+          },
+          tooltip: {
+            backgroundColor: "#fff",
+            titleColor: "#1a1a1a",
+            bodyColor: "#6b7280",
+            borderColor: "#e8e4df",
+            borderWidth: 1,
+            padding: 12,
+            cornerRadius: 10,
+          },
+        },
+        scales: {
+          x: {
+            ticks: { maxTicksLimit: 10, padding: 10 },
+            grid: { display: false },
+          },
+          y: {
+            position: "left",
+            ticks: { padding: 12 },
+            grid: { color: "rgba(0,0,0,0.03)" },
+            title: { display: true, text: "kg", color: "#9ca3af" },
+          },
+          y1: {
+            position: "right",
+            ticks: { padding: 12 },
+            grid: { display: false },
+            title: { display: true, text: "kg (骨量)", color: "#9ca3af" },
+          },
+        },
+      },
+    });
+
+    function filterByMonths(months: number | "all") {
+      if (months === "all") {
+        chart.data.labels = allDates;
+        chart.data.datasets[0].data = allMuscle;
+        chart.data.datasets[1].data = allHydration;
+        chart.data.datasets[2].data = allBone;
+      } else {
+        const lastDate = new Date(allDates[allDates.length - 1]);
+        const cutoff = new Date(lastDate);
+        cutoff.setMonth(cutoff.getMonth() - months);
+        const cutoffStr = cutoff.toISOString().split("T")[0];
+        const startIdx = allDates.findIndex((d: string) => d >= cutoffStr);
+        if (startIdx >= 0) {
+          chart.data.labels = allDates.slice(startIdx);
+          chart.data.datasets[0].data = allMuscle.slice(startIdx);
+          chart.data.datasets[1].data = allHydration.slice(startIdx);
+          chart.data.datasets[2].data = allBone.slice(startIdx);
+        }
+      }
+      chart.update();
+    }
+
+    document.getElementById("bodycomp-period-buttons")?.addEventListener("click", (e) => {
+      const btn = (e.target as HTMLElement).closest("button");
+      if (!btn) return;
+      const period = btn.dataset.period!;
+      document.querySelectorAll("#bodycomp-period-buttons button").forEach((b) => {
+        b.className = "bodycomp-btn";
+      });
+      btn.classList.add("bodycomp-active");
+      filterByMonths(period === "all" ? "all" : parseInt(period));
+    });
+  }
+</script>

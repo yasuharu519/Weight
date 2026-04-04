@@ -8,6 +8,14 @@ interface RawRecord {
   datetime: string;
   weight: number;
   fat: number | null;
+  fat_ratio?: number | null;
+  fat_free_mass?: number | null;
+  muscle_mass?: number | null;
+  hydration?: number | null;
+  bone_mass?: number | null;
+  visceral_fat?: number | null;
+  basal_metabolic_rate?: number | null;
+  metabolic_age?: number | null;
 }
 
 export interface WeightRecord {
@@ -16,6 +24,12 @@ export interface WeightRecord {
   fat: number | null; // kg
   fatPercent: number | null; // %
   bmi: number;
+  muscleMass: number | null;
+  boneMass: number | null;
+  hydration: number | null;
+  visceralFat: number | null;
+  basalMetabolicRate: number | null;
+  metabolicAge: number | null;
 }
 
 export interface MovingAverageRecord {
@@ -39,6 +53,10 @@ export interface YearlyRecord {
   avgFatPercent: number | null;
 }
 
+function round2(v: number): number {
+  return Math.round(v * 100) / 100;
+}
+
 export function loadData(): WeightRecord[] {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const dataPath = path.resolve(__dirname, "../../../data.jsonl");
@@ -58,15 +76,30 @@ export function loadData(): WeightRecord[] {
   return Array.from(byDate.values())
     .map((r) => {
       const date = r.datetime.split(" ")[0];
+      // fat_ratio が直接ある場合はそれを使い、なければ fat/weight で計算
+      const fatPercent =
+        r.fat_ratio != null
+          ? round2(r.fat_ratio)
+          : r.fat != null
+            ? round2((r.fat / r.weight) * 100)
+            : null;
+
       return {
         date,
-        weight: Math.round(r.weight * 100) / 100,
-        fat: r.fat != null ? Math.round(r.fat * 100) / 100 : null,
-        fatPercent:
-          r.fat != null
-            ? Math.round((r.fat / r.weight) * 100 * 100) / 100
+        weight: round2(r.weight),
+        fat: r.fat != null ? round2(r.fat) : null,
+        fatPercent,
+        bmi: round2(r.weight / (HEIGHT_M * HEIGHT_M)),
+        muscleMass: r.muscle_mass != null ? round2(r.muscle_mass) : null,
+        boneMass: r.bone_mass != null ? round2(r.bone_mass) : null,
+        hydration: r.hydration != null ? round2(r.hydration) : null,
+        visceralFat: r.visceral_fat != null ? round2(r.visceral_fat) : null,
+        basalMetabolicRate:
+          r.basal_metabolic_rate != null
+            ? Math.round(r.basal_metabolic_rate)
             : null,
-        bmi: Math.round((r.weight / (HEIGHT_M * HEIGHT_M)) * 100) / 100,
+        metabolicAge:
+          r.metabolic_age != null ? Math.round(r.metabolic_age) : null,
       };
     })
     .sort((a, b) => a.date.localeCompare(b.date));
@@ -95,8 +128,8 @@ export function calcMovingAverage(
 
     result.push({
       date: data[i].date,
-      weight: Math.round(avgWeight * 100) / 100,
-      fatPercent: avgFat != null ? Math.round(avgFat * 100) / 100 : null,
+      weight: round2(avgWeight),
+      fatPercent: avgFat != null ? round2(avgFat) : null,
     });
   }
 
@@ -107,7 +140,7 @@ export function calcMonthlyAvg(data: WeightRecord[]): MonthlyRecord[] {
   const groups = new Map<string, WeightRecord[]>();
 
   for (const r of data) {
-    const month = r.date.slice(0, 7); // YYYY-MM
+    const month = r.date.slice(0, 7);
     const group = groups.get(month) ?? [];
     group.push(r);
     groups.set(month, group);
@@ -128,8 +161,8 @@ export function calcMonthlyAvg(data: WeightRecord[]): MonthlyRecord[] {
       return {
         month,
         year: parseInt(month.slice(0, 4)),
-        weight: Math.round(avgWeight * 100) / 100,
-        fatPercent: avgFat != null ? Math.round(avgFat * 100) / 100 : null,
+        weight: round2(avgWeight),
+        fatPercent: avgFat != null ? round2(avgFat) : null,
       };
     })
     .sort((a, b) => a.month.localeCompare(b.month));
@@ -154,17 +187,16 @@ export function calcYearlyStats(data: WeightRecord[]): YearlyRecord[] {
 
       return {
         year,
-        avgWeight:
-          Math.round(
-            (weights.reduce((a, b) => a + b, 0) / weights.length) * 100,
-          ) / 100,
+        avgWeight: round2(
+          weights.reduce((a, b) => a + b, 0) / weights.length,
+        ),
         minWeight: Math.min(...weights),
         maxWeight: Math.max(...weights),
         avgFatPercent:
           fatValues.length > 0
-            ? Math.round(
-                (fatValues.reduce((a, b) => a + b, 0) / fatValues.length) * 100,
-              ) / 100
+            ? round2(
+                fatValues.reduce((a, b) => a + b, 0) / fatValues.length,
+              )
             : null,
       };
     })
@@ -182,5 +214,5 @@ export function calcWeekOverWeek(data: WeightRecord[]): number | null {
   const prevAvg =
     prev7.reduce((sum, r) => sum + r.weight, 0) / prev7.length;
 
-  return Math.round((recentAvg - prevAvg) * 100) / 100;
+  return round2(recentAvg - prevAvg);
 }
