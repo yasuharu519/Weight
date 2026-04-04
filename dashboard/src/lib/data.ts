@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 const HEIGHT_M = 1.78;
 
@@ -58,8 +57,9 @@ function round2(v: number): number {
 }
 
 export function loadData(): WeightRecord[] {
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  const dataPath = path.resolve(__dirname, "../../../data.jsonl");
+  // Astro v6 changes the working directory during prerender,
+  // so use process.cwd() which points to the dashboard directory
+  const dataPath = path.resolve(process.cwd(), "../data.jsonl");
   const raw = fs.readFileSync(dataPath, "utf-8");
   const records = raw
     .trim()
