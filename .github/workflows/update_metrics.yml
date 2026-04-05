@@ -1,67 +1,110 @@
-name: update metrics
+name: Update metrics data
+
 on:
-  workflow_dispatch:
-    inputs:
-      weight:
-        description: 'Weight metrics on kilogram'
-        required: true
-      fat:
-        description: 'Fat metrics on kilogram'
-        required: false
-        default: null
+  repository_dispatch:
+    types: [weight_updated]
+  schedule:
+    - cron: "0 0 * * *" # フォールバック: 毎日 JST 9:00
+  workflow_dispatch: {}
+
 jobs:
-  update_metrics:
+  sync:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      with:
-        persist-credentials: false
-        fetch-depth: 0
-    - name: Update jsonl
-      run: |
-        datetime=`date '+%F %T'`
-        fat=${{ github.event.inputs.fat }}
-        if [ -z $fat ]; then fat=null ; fi
-        echo "{\"datetime\": \"${datetime}\", \"weight\": ${{ github.event.inputs.weight }}, \"fat\": ${fat}}" >> data.jsonl
-        # git commit
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .
-        git commit -m "Update metrics on ${datetime}"
-      env:
-        TZ: Asia/Tokyo
-    - name: Push changes
-      uses: ad-m/github-push-action@77c5b412c50b723d2a4fbc6d71fb5723bcd439aa # v1.0.0
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Slack Notification on SUCCESS
-      if: success()
-      uses: tokorom/action-slack-incoming-webhook@d57bf1eb618f3dae9509afefa70d5774ad3d42bf # v1.3.0
-      env:
-        INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      with:
-        text: Weight updated!
-        attachments: |
-          [
-            {
-              "color": "good",
-              "author_name": "${{ github.actor }}",
-              "author_icon": "${{ github.event.sender.avatar_url }}",
-              "fields": [
-                {
-                  "title": "体重",
-                  "value": "${{ github.event.inputs.weight }}"
-                },
-                {
-                  "title": "脂肪 (kg)",
-                  "value": "${{ github.event.inputs.fat }}"
-                }
-              ]
-            }
-          ]
-    - name: Post on pixela
-      run: |
-        date=`date '+%Y%m%d'`
-        curl -X POST https://pixe.la/v1/users/yasuharu519/graphs/weight -H "X-USER-TOKEN:${{ secrets.PIXELA_TOKEN }}" -d "{\"date\":\"${date}\",\"quantity\":\"${{ github.event.inputs.weight }}\"}"
-      env:
-        TZ: Asia/Tokyo
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Get last synced datetime
+        id: last_date
+        run: |
+          if [ -f data.jsonl ]; then
+            last=$(tail -1 data.jsonl | jq -r '.datetime')
+            echo "datetime=${last}" >> "$GITHUB_OUTPUT"
+          else
+            echo "datetime=2024-03-19 00:00:00+09:00" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch new data from D1
+        id: fetch
+        run: |
+          response=$(curl -sf -X POST \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/d1/database/${{ secrets.D1_DATABASE_ID }}/query" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"sql\": \"SELECT measured_at, weight, fat_mass, fat_ratio, fat_free_mass, muscle_mass, hydration, bone_mass, visceral_fat, basal_metabolic_rate, metabolic_age FROM weight_measurements WHERE measured_at > ? ORDER BY measured_at ASC\", \"params\": [\"${{ steps.last_date.outputs.datetime }}\"]}")
+
+          count=$(echo "$response" | jq '.result[0].results | length')
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+
+          if [ "$count" -gt 0 ]; then
+            echo "$response" | jq -c '.result[0].results[] | {
+              "datetime": .measured_at,
+              "weight": .weight,
+              "fat": .fat_mass,
+              "fat_ratio": .fat_ratio,
+              "fat_free_mass": .fat_free_mass,
+              "muscle_mass": .muscle_mass,
+              "hydration": .hydration,
+              "bone_mass": .bone_mass,
+              "visceral_fat": .visceral_fat,
+              "basal_metabolic_rate": .basal_metabolic_rate,
+              "metabolic_age": .metabolic_age
+            }' >> data.jsonl
+
+            # 最新データを取得（通知用）
+            latest_weight=$(echo "$response" | jq -r '.result[0].results[-1].weight')
+            latest_fat_ratio=$(echo "$response" | jq -r '.result[0].results[-1].fat_ratio')
+            latest_muscle=$(echo "$response" | jq -r '.result[0].results[-1].muscle_mass')
+            echo "latest_weight=${latest_weight}" >> "$GITHUB_OUTPUT"
+            echo "latest_fat_ratio=${latest_fat_ratio}" >> "$GITHUB_OUTPUT"
+            echo "latest_muscle=${latest_muscle}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push
+        if: steps.fetch.outputs.count != '0'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data.jsonl
+          datetime=$(date '+%F %T')
+          git commit -m "Sync weight data from D1 on ${datetime}"
+          git push
+        env:
+          TZ: Asia/Tokyo
+
+      - name: Post on Pixela
+        if: steps.fetch.outputs.count != '0'
+        run: |
+          date=$(date '+%Y%m%d')
+          curl -X POST https://pixe.la/v1/users/yasuharu519/graphs/weight \
+            -H "X-USER-TOKEN:${{ secrets.PIXELA_TOKEN }}" \
+            -d "{\"date\":\"${date}\",\"quantity\":\"${{ steps.fetch.outputs.latest_weight }}\"}"
+        env:
+          TZ: Asia/Tokyo
+
+      - name: Slack Notification
+        if: steps.fetch.outputs.count != '0'
+        uses: tokorom/action-slack-incoming-webhook@d57bf1eb618f3dae9509afefa70d5774ad3d42bf # v1.3.0
+        env:
+          INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          text: Weight synced from D1!
+          attachments: |
+            [
+              {
+                "color": "good",
+                "fields": [
+                  {
+                    "title": "体重",
+                    "value": "${{ steps.fetch.outputs.latest_weight }} kg"
+                  },
+                  {
+                    "title": "体脂肪率",
+                    "value": "${{ steps.fetch.outputs.latest_fat_ratio }} %"
+                  },
+                  {
+                    "title": "筋肉量",
+                    "value": "${{ steps.fetch.outputs.latest_muscle }} kg"
+                  }
+                ]
+              }
+            ]
