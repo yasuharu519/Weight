@@ -1,25 +1,24 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --color-surface: #faf8f5;
-    --color-card: #ffffff;
-    --color-ink: #1a1a1a;
-    --color-ink-secondary: #6b7280;
-    --color-ink-muted: #9ca3af;
-    --color-border: #e8e4df;
-    --color-accent: #4338ca;
-    --color-accent-soft: #eef2ff;
-    --color-warm: #c2410c;
-    --color-warm-soft: #fff7ed;
-    --color-sage: #15803d;
-    --color-sage-soft: #f0fdf4;
-  }
+@theme {
+  --color-surface: #faf8f5;
+  --color-card: #ffffff;
+  --color-ink: #1a1a1a;
+  --color-ink-secondary: #6b7280;
+  --color-ink-muted: #9ca3af;
+  --color-border: #e8e4df;
+  --color-accent: #4338ca;
+  --color-accent-soft: #eef2ff;
+  --color-warm: #c2410c;
+  --color-warm-soft: #fff7ed;
+  --color-sage: #15803d;
+  --color-sage-soft: #f0fdf4;
 
-  html {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
