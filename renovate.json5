@@ -7,6 +7,20 @@
   // サプライチェーン攻撃対策: 公開から14日間は様子を見る
   "minimumReleaseAge": "14 days",
 
+  // 脆弱性アラートは 14 日ルールを解除して即時 PR を出す
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "minimumReleaseAge": null,
+    "schedule": ["at any time"],
+    "labels": ["security"],
+  },
+
+  // OSV からの脆弱性検知も併用
+  "osvVulnerabilityAlerts": true,
+
+  // 間接依存 (transitive) の脆弱性を lockfile のみで修復する (npm)
+  "transitiveRemediation": true,
+
   "packageRules": [
     // Astro 関連をグルーピング
     {
